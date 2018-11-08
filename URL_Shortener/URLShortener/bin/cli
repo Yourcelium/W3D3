@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+require 'launchy'
+
+puts "What's yo email?"
+email = gets.chomp
+
+user = User.find_by(email: email)
+
+until user
+  puts "not an in database, try again"
+  email = gets.chomp
+
+  user = User.find_by(email: email)
+end
+
+
+puts "Type in an website"
+website = gets.chomp
+
+website_instance = ShortenedUrl.find_by(user: user, long_url: website)
+unless website_instance
+  website_instance = ShortenedUrl.create!(user, website)
+end
+
+visit = Visit.record_visit!(user, website_instance)
+
+puts "Your shortened URL #{website_instance.short_url}"
+puts "Visit this sight? (y/n)"
+answer = gets.chomp
+
+if answer == "y"
+  launchy.open(website)
+end
